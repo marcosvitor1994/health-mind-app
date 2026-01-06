@@ -39,3 +39,21 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Environment variables (IMPORTANTE: nunca commitar senhas/tokens!)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.log
+*.tmp
+*.jpeg
+*.jpg
+*.png
+estrutura.txt
+com.facebook.*
