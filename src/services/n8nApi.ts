@@ -56,11 +56,28 @@ export const sendMessageToN8N = async (
       throw new Error(`Erro na API: ${response.status} - ${errorText}`);
     }
 
-    const data: ChatResponse = await response.json();
-    console.log('✅ [n8nApi] Resposta recebida:', data);
-    console.log('💬 [n8nApi] Texto da resposta:', data.resposta);
+    // Pega o texto da resposta primeiro
+    const responseText = await response.text();
+    console.log('📄 [n8nApi] Texto bruto da resposta:', responseText);
 
-    return data.resposta;
+    // Tenta fazer parse do JSON
+    if (!responseText || responseText.trim() === '') {
+      console.error('❌ [n8nApi] Resposta vazia da API');
+      throw new Error('API retornou resposta vazia');
+    }
+
+    let data: ChatResponse;
+    try {
+      data = JSON.parse(responseText);
+      console.log('✅ [n8nApi] Resposta recebida:', data);
+      console.log('💬 [n8nApi] Texto da resposta:', data.resposta);
+    } catch (parseError) {
+      console.error('❌ [n8nApi] Erro ao fazer parse do JSON:', parseError);
+      console.error('❌ [n8nApi] Resposta recebida não é JSON válido:', responseText);
+      throw new Error(`Resposta inválida da API: ${responseText.substring(0, 100)}`);
+    }
+
+    return data.resposta || 'Desculpe, não recebi uma resposta válida.';
 
   } catch (error) {
     console.error('❌ [n8nApi] Erro ao enviar mensagem para n8n:', error);

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 interface HeaderProps {
@@ -18,7 +19,8 @@ export default function Header({
   rightIcon,
 }: HeaderProps) {
   return (
-    <View style={styles.header}>
+    <SafeAreaView edges={['top']} style={styles.safeArea}>
+      <View style={styles.header}>
       <View style={styles.leftContainer}>
         {onBack && (
           <TouchableOpacity onPress={onBack} style={styles.iconButton}>
@@ -39,11 +41,15 @@ export default function Header({
           </TouchableOpacity>
         )}
       </View>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    backgroundColor: '#fff',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../../components/Header';
 
@@ -93,98 +94,100 @@ export default function PsychologistChatScreen({ navigation }: any) {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={0}
-    >
-      <Header
-        title="Dr. João Silva"
-        subtitle="Online"
-        onBack={() => navigation.goBack()}
-      />
-
-      <ScrollView
-        style={styles.messagesContainer}
-        contentContainerStyle={styles.messagesContent}
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
       >
-        {messages.map((msg) => (
-          <View
-            key={msg.id}
-            style={[
-              styles.messageBubble,
-              msg.sender === 'client'
-                ? styles.clientBubble
-                : styles.psychologistBubble,
-            ]}
-          >
-            <Text
+        <Header
+          title="Dr. João Silva"
+          subtitle="Online"
+          onBack={() => navigation.goBack()}
+        />
+
+        <ScrollView
+          style={styles.messagesContainer}
+          contentContainerStyle={styles.messagesContent}
+        >
+          {messages.map((msg) => (
+            <View
+              key={msg.id}
               style={[
-                styles.messageText,
+                styles.messageBubble,
                 msg.sender === 'client'
-                  ? styles.clientText
-                  : styles.psychologistText,
+                  ? styles.clientBubble
+                  : styles.psychologistBubble,
               ]}
             >
-              {msg.text}
-            </Text>
-            <View style={styles.messageFooter}>
               <Text
                 style={[
-                  styles.timestamp,
+                  styles.messageText,
                   msg.sender === 'client'
-                    ? styles.clientTimestamp
-                    : styles.psychologistTimestamp,
+                    ? styles.clientText
+                    : styles.psychologistText,
                 ]}
               >
-                {formatTimestamp(msg.timestamp)}
+                {msg.text}
               </Text>
-              {msg.sender === 'client' && (
-                <Ionicons
-                  name={getStatusIcon(msg.status)}
-                  size={14}
-                  color={msg.status === 'read' ? '#4A90E2' : '#fff'}
-                  style={styles.statusIcon}
-                />
-              )}
+              <View style={styles.messageFooter}>
+                <Text
+                  style={[
+                    styles.timestamp,
+                    msg.sender === 'client'
+                      ? styles.clientTimestamp
+                      : styles.psychologistTimestamp,
+                  ]}
+                >
+                  {formatTimestamp(msg.timestamp)}
+                </Text>
+                {msg.sender === 'client' && (
+                  <Ionicons
+                    name={getStatusIcon(msg.status)}
+                    size={14}
+                    color={msg.status === 'read' ? '#4A90E2' : '#fff'}
+                    style={styles.statusIcon}
+                  />
+                )}
+              </View>
             </View>
-          </View>
-        ))}
-      </ScrollView>
+          ))}
+        </ScrollView>
 
-      <View style={styles.inputContainer}>
-        <View style={styles.inputWrapper}>
-          <TouchableOpacity style={styles.attachButton}>
-            <Ionicons name="attach" size={24} color="#666" />
-          </TouchableOpacity>
-          <TextInput
-            style={styles.input}
-            placeholder="Digite sua mensagem..."
-            value={message}
-            onChangeText={setMessage}
-            multiline
-            maxLength={1000}
-          />
-          <TouchableOpacity
-            style={[
-              styles.sendButton,
-              !message.trim() && styles.sendButtonDisabled,
-            ]}
-            onPress={handleSend}
-            disabled={!message.trim()}
-          >
-            <Ionicons
-              name="send"
-              size={24}
-              color={message.trim() ? '#4A90E2' : '#ccc'}
+        <View style={styles.inputContainer}>
+          <View style={styles.inputWrapper}>
+            <TouchableOpacity style={styles.attachButton}>
+              <Ionicons name="attach" size={24} color="#666" />
+            </TouchableOpacity>
+            <TextInput
+              style={styles.input}
+              placeholder="Digite sua mensagem..."
+              value={message}
+              onChangeText={setMessage}
+              multiline
+              maxLength={1000}
             />
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.sendButton,
+                !message.trim() && styles.sendButtonDisabled,
+              ]}
+              onPress={handleSend}
+              disabled={!message.trim()}
+            >
+              <Ionicons
+                name="send"
+                size={24}
+                color={message.trim() ? '#4A90E2' : '#ccc'}
+              />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.hint}>
+            Este chat é confidencial e seguro
+          </Text>
         </View>
-        <Text style={styles.hint}>
-          Este chat é confidencial e seguro
-        </Text>
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 

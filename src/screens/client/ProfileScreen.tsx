@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
@@ -8,7 +9,8 @@ export default function ProfileScreen() {
   const { user, logout } = useAuth();
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView>
       <View style={styles.header}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>
@@ -129,7 +131,8 @@ export default function ProfileScreen() {
       </TouchableOpacity>
 
       <Text style={styles.version}>Versão 1.0.0</Text>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

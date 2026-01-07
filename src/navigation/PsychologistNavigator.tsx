@@ -8,6 +8,7 @@ import DocumentsScreen from '../screens/psychologist/DocumentsScreen';
 import ReportsScreen from '../screens/psychologist/ReportsScreen';
 import AddClientScreen from '../screens/psychologist/AddClientScreen';
 import AnamneseFormScreen from '../screens/psychologist/AnamneseFormScreen';
+import ProfileScreen from '../screens/psychologist/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -68,6 +69,16 @@ export default function PsychologistNavigator() {
           title: 'Relatórios',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="stats-chart" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          title: 'Perfil',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
           ),
         }}
       />

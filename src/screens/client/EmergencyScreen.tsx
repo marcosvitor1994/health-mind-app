@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
 
@@ -13,7 +14,8 @@ export default function EmergencyScreen({ navigation }: any) {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView>
       <Card style={styles.alertCard}>
         <Ionicons name="alert-circle" size={48} color="#FF6B6B" />
         <Text style={styles.alertTitle}>Em caso de emergência</Text>
@@ -135,7 +137,8 @@ export default function EmergencyScreen({ navigation }: any) {
           Lembre-se: buscar ajuda é um ato de coragem. Você não está sozinho(a).
         </Text>
       </Card>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

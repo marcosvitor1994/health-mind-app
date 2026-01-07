@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
 
@@ -50,7 +51,7 @@ export default function ReportsScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Relatórios de Chat</Text>
         <TouchableOpacity style={styles.filterButton}>
@@ -126,7 +127,7 @@ export default function ReportsScreen() {
           </TouchableOpacity>
         </Card>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 

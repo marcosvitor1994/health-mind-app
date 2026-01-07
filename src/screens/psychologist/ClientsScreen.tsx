@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
 
@@ -66,7 +67,7 @@ export default function ClientsScreen({ navigation }: any) {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Meus Pacientes</Text>
         <TouchableOpacity
@@ -155,7 +156,7 @@ export default function ClientsScreen({ navigation }: any) {
           </Card>
         ))}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 

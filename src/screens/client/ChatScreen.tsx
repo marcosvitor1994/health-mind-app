@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,73 +8,95 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { sendMessageToN8N } from '../../services/n8nApi';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function ChatScreen() {
+  const { user } = useAuth();
   const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: '1',
       text: 'Olá! Como você está se sentindo hoje?',
       isAI: true,
-      timestamp: new Date('2025-12-22T10:00:00'),
-    },
-    {
-      id: '2',
-      text: 'Estou me sentindo um pouco ansioso hoje.',
-      isAI: false,
-      timestamp: new Date('2025-12-22T10:01:00'),
-    },
-    {
-      id: '3',
-      text: 'Entendo. Você pode me contar o que está causando essa ansiedade?',
-      isAI: true,
-      timestamp: new Date('2025-12-22T10:01:30'),
+      timestamp: new Date(),
     },
   ]);
+  const scrollViewRef = useRef<ScrollView>(null);
 
-  const handleSend = () => {
-    if (message.trim()) {
-      const newMessage = {
+  useEffect(() => {
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (message.trim() && !isLoading) {
+      const userMessage = {
         id: Date.now().toString(),
         text: message,
         isAI: false,
         timestamp: new Date(),
       };
-      setMessages([...messages, newMessage]);
-      setMessage('');
 
-      setTimeout(() => {
+      const messageToSend = message;
+      setMessages((prev) => [...prev, userMessage]);
+      setMessage('');
+      setIsLoading(true);
+
+      try {
+        const aiResponseText = await sendMessageToN8N(
+          messageToSend,
+          user?.id || 'user-123',
+          'psych-456'
+        );
+
         const aiResponse = {
           id: (Date.now() + 1).toString(),
-          text: 'Obrigado por compartilhar isso comigo. Como isso está afetando seu dia a dia?',
+          text: aiResponseText,
           isAI: true,
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, aiResponse]);
-      }, 1000);
+      } catch (error) {
+        console.error('Erro ao enviar mensagem:', error);
+        const errorResponse = {
+          id: (Date.now() + 1).toString(),
+          text: 'Desculpe, ocorreu um erro. Tente novamente.',
+          isAI: true,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, errorResponse]);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={90}
-    >
-      <View style={styles.header}>
-        <View style={styles.aiIndicator}>
-          <View style={styles.aiDot} />
-          <Text style={styles.aiText}>Assistente IA</Text>
-        </View>
-        <Text style={styles.subtitle}>Seu diário pessoal</Text>
-      </View>
-
-      <ScrollView
-        style={styles.messagesContainer}
-        contentContainerStyle={styles.messagesContent}
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
+        <View style={styles.header}>
+          <View style={styles.aiIndicator}>
+            <View style={styles.aiDot} />
+            <Text style={styles.aiText}>Assistente IA</Text>
+          </View>
+          <Text style={styles.subtitle}>Seu diário pessoal</Text>
+        </View>
+
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.messagesContainer}
+          contentContainerStyle={styles.messagesContent}
+          keyboardShouldPersistTaps="handled"
+        >
         {messages.map((msg) => (
           <View
             key={msg.id}
@@ -111,30 +133,38 @@ export default function ChatScreen() {
             </View>
           </View>
         ))}
-      </ScrollView>
+        {isLoading && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color="#4A90E2" />
+            <Text style={styles.loadingText}>Digitando...</Text>
+          </View>
+        )}
+        </ScrollView>
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Escreva como você está se sentindo..."
-          value={message}
-          onChangeText={setMessage}
-          multiline
-          maxLength={500}
-        />
-        <TouchableOpacity
-          style={[styles.sendButton, !message.trim() && styles.sendButtonDisabled]}
-          onPress={handleSend}
-          disabled={!message.trim()}
-        >
-          <Ionicons
-            name="send"
-            size={24}
-            color={message.trim() ? '#fff' : '#ccc'}
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Escreva como você está se sentindo..."
+            value={message}
+            onChangeText={setMessage}
+            multiline
+            maxLength={500}
+            editable={!isLoading}
           />
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+          <TouchableOpacity
+            style={[styles.sendButton, (!message.trim() || isLoading) && styles.sendButtonDisabled]}
+            onPress={handleSend}
+            disabled={!message.trim() || isLoading}
+          >
+            <Ionicons
+              name="send"
+              size={24}
+              color={message.trim() && !isLoading ? '#fff' : '#ccc'}
+            />
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -142,6 +172,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  flex: {
+    flex: 1,
   },
   header: {
     padding: 16,
@@ -247,5 +280,21 @@ const styles = StyleSheet.create({
   },
   sendButtonDisabled: {
     backgroundColor: '#f0f0f0',
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: '#fff',
+    padding: 12,
+    borderRadius: 16,
+    borderBottomLeftRadius: 4,
+    marginBottom: 12,
+  },
+  loadingText: {
+    marginLeft: 8,
+    color: '#666',
+    fontSize: 14,
+    fontStyle: 'italic',
   },
 });

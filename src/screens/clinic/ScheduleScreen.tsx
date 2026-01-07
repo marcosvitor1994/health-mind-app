@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
 
@@ -68,7 +69,7 @@ export default function ScheduleScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Agenda do Dia</Text>
         <Text style={styles.dateText}>
@@ -156,7 +157,7 @@ export default function ScheduleScreen() {
           </Card>
         ))}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
