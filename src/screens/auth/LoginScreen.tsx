@@ -8,7 +8,12 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Modal,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserRole } from '../../types';
 
@@ -17,6 +22,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [selectedRole, setSelectedRole] = useState<UserRole>('client');
   const [loading, setLoading] = useState(false);
+  const [showRoleModal, setShowRoleModal] = useState(false);
   const { login } = useAuth();
 
   const handleLogin = async () => {
@@ -35,40 +41,64 @@ export default function LoginScreen() {
     }
   };
 
-  const RoleButton = ({ role, label }: { role: UserRole; label: string }) => (
-    <TouchableOpacity
-      style={[
-        styles.roleButton,
-        selectedRole === role && styles.roleButtonActive,
-      ]}
-      onPress={() => setSelectedRole(role)}
-    >
-      <Text
-        style={[
-          styles.roleButtonText,
-          selectedRole === role && styles.roleButtonTextActive,
-        ]}
-      >
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
+  const getRoleIcon = (role: UserRole) => {
+    switch (role) {
+      case 'client':
+        return 'person';
+      case 'psychologist':
+        return 'medkit-outline'; // Ícone relacionado à saúde/atendimento
+      case 'clinic':
+        return 'business';
+      default:
+        return 'person';
+    }
+  };
+
+  const getRoleLabel = (role: UserRole) => {
+    switch (role) {
+      case 'client':
+        return 'Cliente';
+      case 'psychologist':
+        return 'Psicólogo';
+      case 'clinic':
+        return 'Clínica';
+      default:
+        return 'Cliente';
+    }
+  };
+
+  const selectRole = (role: UserRole) => {
+    setSelectedRole(role);
+    setShowRoleModal(false);
+  };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Health Mind</Text>
-        <Text style={styles.subtitle}>Cuidando da sua mente</Text>
-      </View>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Ícone de seleção de tipo de acesso */}
+        <TouchableOpacity
+          style={styles.roleIconButton}
+          onPress={() => setShowRoleModal(true)}
+        >
+          <Ionicons name={getRoleIcon(selectedRole)} size={28} color="#fff" />
+        </TouchableOpacity>
 
-      <View style={styles.form}>
-        <Text style={styles.label}>Tipo de Acesso</Text>
-        <View style={styles.roleContainer}>
-          <RoleButton role="client" label="Cliente" />
-          <RoleButton role="psychologist" label="Psicólogo" />
-          <RoleButton role="clinic" label="Clínica" />
+        <View style={styles.header}>
+          <Image
+            source={require('../../../assets/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
         </View>
 
+        <View style={styles.form}>
         <Text style={styles.label}>Email</Text>
         <TextInput
           style={styles.input}
@@ -105,33 +135,129 @@ export default function LoginScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Versão 1.0.0 - Demo</Text>
-      </View>
-    </View>
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Versão 1.0.0 - Demo</Text>
+        </View>
+      </ScrollView>
+
+      {/* Modal de seleção de tipo de acesso */}
+      <Modal
+        visible={showRoleModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowRoleModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowRoleModal(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Selecione o tipo de acesso</Text>
+
+            <TouchableOpacity
+              style={[
+                styles.roleOption,
+                selectedRole === 'client' && styles.roleOptionSelected,
+              ]}
+              onPress={() => selectRole('client')}
+            >
+              <Ionicons
+                name="person"
+                size={32}
+                color={selectedRole === 'client' ? '#4A90E2' : '#666'}
+              />
+              <Text
+                style={[
+                  styles.roleOptionText,
+                  selectedRole === 'client' && styles.roleOptionTextSelected,
+                ]}
+              >
+                Cliente
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.roleOption,
+                selectedRole === 'psychologist' && styles.roleOptionSelected,
+              ]}
+              onPress={() => selectRole('psychologist')}
+            >
+              <Ionicons
+                name="medkit-outline"
+                size={32}
+                color={selectedRole === 'psychologist' ? '#4A90E2' : '#666'}
+              />
+              <Text
+                style={[
+                  styles.roleOptionText,
+                  selectedRole === 'psychologist' && styles.roleOptionTextSelected,
+                ]}
+              >
+                Psicólogo
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.roleOption,
+                selectedRole === 'clinic' && styles.roleOptionSelected,
+              ]}
+              onPress={() => selectRole('clinic')}
+            >
+              <Ionicons
+                name="business"
+                size={32}
+                color={selectedRole === 'clinic' ? '#4A90E2' : '#666'}
+              />
+              <Text
+                style={[
+                  styles.roleOptionText,
+                  selectedRole === 'clinic' && styles.roleOptionTextSelected,
+                ]}
+              >
+                Clínica
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#1A252F', // Azul mais escuro
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     padding: 20,
+  },
+  roleIconButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 10,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   header: {
     alignItems: 'center',
     marginBottom: 40,
   },
-  title: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#4A90E2',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
+  logo: {
+    width: 200,
+    height: 200,
   },
   form: {
     backgroundColor: '#fff',
@@ -149,34 +275,6 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 8,
     marginTop: 12,
-  },
-  roleContainer: {
-    flexDirection: 'row',
-    
-    marginBottom: 8,
-  },
-  roleButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fff',
-    alignItems: 'center',
-  },
-  roleButtonActive: {
-    backgroundColor: '#4A90E2',
-    borderColor: '#4A90E2',
-  },
-  roleButtonText: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
-  },
-  roleButtonTextActive: {
-    color: '#fff',
-    fontWeight: '600',
   },
   input: {
     borderWidth: 1,
@@ -214,5 +312,49 @@ const styles = StyleSheet.create({
   footerText: {
     color: '#999',
     fontSize: 12,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    width: '80%',
+    maxWidth: 320,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  roleOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+    marginBottom: 12,
+    backgroundColor: '#fff',
+  },
+  roleOptionSelected: {
+    borderColor: '#4A90E2',
+    backgroundColor: '#f0f7ff',
+  },
+  roleOptionText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
+    marginLeft: 16,
+  },
+  roleOptionTextSelected: {
+    color: '#4A90E2',
+    fontWeight: '600',
   },
 });

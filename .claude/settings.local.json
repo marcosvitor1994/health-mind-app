@@ -7,7 +7,20 @@
       "Bash(npm install:*)",
       "Bash(find:*)",
       "Bash(git checkout:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(expo start:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(timeout:*)",
+      "Bash(test:*)",
+      "Bash(powershell:*)",
+      "Bash(ren index.ts index.js)",
+      "Bash(git rm:*)",
+      "Bash(git clean:*)",
+      "Bash(git add .gitignore)",
+      "Bash(git add:*)",
+      "Bash(npx expo install:*)"
     ]
   }
 }

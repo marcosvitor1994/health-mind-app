@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -84,9 +85,14 @@ export default function ChatScreen() {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
         <View style={styles.header}>
+          <Image
+            source={require('../../../assets/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
           <View style={styles.aiIndicator}>
             <View style={styles.aiDot} />
-            <Text style={styles.aiText}>Assistente IA</Text>
+            <Text style={styles.aiText}>Assistente</Text>
           </View>
           <Text style={styles.subtitle}>Seu diário pessoal</Text>
         </View>
@@ -182,6 +188,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
     alignItems: 'center',
+  },
+  logo: {
+    width: 60,
+    height: 60,
+    marginBottom: 8,
   },
   aiIndicator: {
     flexDirection: 'row',

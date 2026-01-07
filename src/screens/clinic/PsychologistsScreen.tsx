@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../components/Card';
 
-export default function PsychologistsScreen() {
+export default function PsychologistsScreen({ navigation }: any) {
   const psychologists = [
     {
       id: '1',
@@ -36,7 +36,10 @@ export default function PsychologistsScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Psicólogos da Clínica</Text>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => navigation.navigate('AddPsychologist')}
+        >
           <Ionicons name="add-circle" size={28} color="#4A90E2" />
         </TouchableOpacity>
       </View>

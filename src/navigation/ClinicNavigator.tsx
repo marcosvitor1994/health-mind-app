@@ -1,12 +1,24 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import OverviewScreen from '../screens/clinic/OverviewScreen';
 import PsychologistsScreen from '../screens/clinic/PsychologistsScreen';
 import ScheduleScreen from '../screens/clinic/ScheduleScreen';
 import ProfileScreen from '../screens/clinic/ProfileScreen';
+import AddPsychologistScreen from '../screens/clinic/AddPsychologistScreen';
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+
+function PsychologistsStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="PsychologistsList" component={PsychologistsScreen} />
+      <Stack.Screen name="AddPsychologist" component={AddPsychologistScreen} />
+    </Stack.Navigator>
+  );
+}
 
 export default function ClinicNavigator() {
   return (
@@ -29,7 +41,7 @@ export default function ClinicNavigator() {
       />
       <Tab.Screen
         name="Psychologists"
-        component={PsychologistsScreen}
+        component={PsychologistsStack}
         options={{
           title: 'Psicólogos',
           tabBarIcon: ({ color, size }) => (
