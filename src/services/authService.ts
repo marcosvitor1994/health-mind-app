@@ -20,13 +20,20 @@ import {
 /**
  * Login de usuário
  */
-export const login = async (email: string, password: string): Promise<LoginResponse> => {
+export const login = async (
+  email: string,
+  password: string
+): Promise<{ user: User; token: string; refreshToken: string }> => {
   try {
     const { data } = await api.post<LoginResponse>('/auth/login', {
       email,
       password,
     });
-    return data;
+
+    if (data.success && data.data) {
+      return data.data;
+    }
+    throw new Error(data.message || 'Erro ao fazer login');
   } catch (error) {
     throw new Error(getErrorMessage(error));
   }
@@ -219,17 +226,17 @@ export const cancelInvitation = async (invitationId: string): Promise<void> => {
  */
 export const completeClinicRegistration = async (
   data: CompleteRegistrationClinicRequest
-): Promise<LoginResponse> => {
+): Promise<{ user: User; token: string; refreshToken: string }> => {
   try {
     const response = await api.post<LoginResponse>(
       '/auth/complete-registration/clinic',
       data
     );
 
-    if (response.data.success) {
-      return response.data;
+    if (response.data.success && response.data.data) {
+      return response.data.data;
     }
-    throw new Error('Erro ao completar cadastro');
+    throw new Error(response.data.message || 'Erro ao completar cadastro');
   } catch (error) {
     throw new Error(getErrorMessage(error));
   }
@@ -240,17 +247,17 @@ export const completeClinicRegistration = async (
  */
 export const completePsychologistRegistration = async (
   data: CompleteRegistrationPsychologistRequest
-): Promise<LoginResponse> => {
+): Promise<{ user: User; token: string; refreshToken: string }> => {
   try {
     const response = await api.post<LoginResponse>(
       '/auth/complete-registration/psychologist',
       data
     );
 
-    if (response.data.success) {
-      return response.data;
+    if (response.data.success && response.data.data) {
+      return response.data.data;
     }
-    throw new Error('Erro ao completar cadastro');
+    throw new Error(response.data.message || 'Erro ao completar cadastro');
   } catch (error) {
     throw new Error(getErrorMessage(error));
   }
@@ -261,17 +268,17 @@ export const completePsychologistRegistration = async (
  */
 export const completePatientRegistration = async (
   data: CompleteRegistrationPatientRequest
-): Promise<LoginResponse> => {
+): Promise<{ user: User; token: string; refreshToken: string }> => {
   try {
     const response = await api.post<LoginResponse>(
       '/auth/complete-registration/patient',
       data
     );
 
-    if (response.data.success) {
-      return response.data;
+    if (response.data.success && response.data.data) {
+      return response.data.data;
     }
-    throw new Error('Erro ao completar cadastro');
+    throw new Error(response.data.message || 'Erro ao completar cadastro');
   } catch (error) {
     throw new Error(getErrorMessage(error));
   }

@@ -70,25 +70,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Chamar API de login
       const response = await authService.login(email, password);
 
-      if (response.success && response.data) {
-        const { user: userData, token, refreshToken } = response.data;
+      const { user: userData, token, refreshToken } = response;
 
-        // Salvar tokens
-        await storage.setToken(token);
-        await storage.setRefreshToken(refreshToken);
+      // Salvar tokens
+      await storage.setToken(token);
+      await storage.setRefreshToken(refreshToken);
 
-        // Normalizar user data (garantir que tenha 'id' além de '_id')
-        const normalizedUser: User = {
-          ...userData,
-          id: userData._id || userData.id,
-        };
+      // Normalizar user data (garantir que tenha 'id' além de '_id')
+      const normalizedUser: User = {
+        ...userData,
+        id: userData._id || userData.id,
+      };
 
-        // Salvar usuário
-        await storage.setUser(normalizedUser);
-        setUser(normalizedUser);
-      } else {
-        throw new Error(response.message || 'Erro ao fazer login');
-      }
+      // Salvar usuário
+      await storage.setUser(normalizedUser);
+      setUser(normalizedUser);
     } catch (error) {
       console.error('Erro no login:', error);
       throw error;
