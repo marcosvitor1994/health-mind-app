@@ -354,25 +354,13 @@ export default function PatientsScreen({ navigation }: any) {
                   </View>
                 )}
 
-                <View style={styles.actionsRow}>
-                  <TouchableOpacity
-                    style={[styles.actionButton, styles.assignButton]}
-                    onPress={() => handleAssignPsychologist(patient)}
-                  >
-                    <Ionicons name={hasAssignedPsy ? 'swap-horizontal' : 'person-add'} size={18} color="#4A90E2" />
-                    <Text style={styles.assignButtonText}>
-                      {hasAssignedPsy ? 'Reatribuir' : 'Atribuir'}
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[styles.actionButton, styles.unlinkButton]}
-                    onPress={() => handleUnlinkPatient(patient)}
-                  >
-                    <Ionicons name="unlink" size={18} color="#FF6B6B" />
-                    <Text style={styles.unlinkButtonText}>Desvincular</Text>
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity
+                  style={styles.viewDetailsButton}
+                  onPress={() => handleOpenContactModal(patient)}
+                >
+                  <Text style={styles.viewDetailsButtonText}>Ver Detalhes</Text>
+                  <Ionicons name="chevron-forward" size={20} color="#4A90E2" />
+                </TouchableOpacity>
                 </Card>
               </TouchableOpacity>
             );
@@ -472,7 +460,7 @@ export default function PatientsScreen({ navigation }: any) {
         </View>
       </Modal>
 
-      {/* Modal de Contato do Paciente */}
+      {/* Modal de Detalhes do Paciente */}
       <Modal
         visible={showContactModal}
         animationType="slide"
@@ -482,19 +470,22 @@ export default function PatientsScreen({ navigation }: any) {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Dados do Paciente</Text>
+              <Text style={styles.modalTitle}>Detalhes do Paciente</Text>
               <TouchableOpacity onPress={() => setShowContactModal(false)}>
                 <Ionicons name="close" size={28} color="#333" />
               </TouchableOpacity>
             </View>
 
             {contactPatient && (
-              <View>
+              <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.contactAvatar}>
                   <Ionicons name="person-circle" size={80} color="#50C878" />
                 </View>
 
                 <Text style={styles.contactName}>{contactPatient.name}</Text>
+                <Text style={styles.contactSubtitle}>
+                  {getPsychologistName(contactPatient)}
+                </Text>
 
                 <View style={styles.contactInfo}>
                   <View style={styles.contactInfoRow}>
@@ -518,7 +509,7 @@ export default function PatientsScreen({ navigation }: any) {
                       style={[styles.contactActionButton, { backgroundColor: '#25D366' }]}
                       onPress={() => handleWhatsApp(contactPatient.phone)}
                     >
-                      <Ionicons name="logo-whatsapp" size={24} color="#fff" />
+                      <Ionicons name="logo-whatsapp" size={20} color="#fff" />
                       <Text style={styles.contactActionText}>WhatsApp</Text>
                     </TouchableOpacity>
 
@@ -526,11 +517,75 @@ export default function PatientsScreen({ navigation }: any) {
                       style={[styles.contactActionButton, { backgroundColor: '#4A90E2' }]}
                       onPress={() => handleCall(contactPatient.phone)}
                     >
-                      <Ionicons name="call" size={24} color="#fff" />
+                      <Ionicons name="call" size={20} color="#fff" />
                       <Text style={styles.contactActionText}>Ligar</Text>
                     </TouchableOpacity>
                   </View>
                 )}
+
+                {/* Estatísticas do Paciente */}
+                <View style={styles.statsSection}>
+                  <Text style={styles.sectionTitle}>Estatísticas</Text>
+
+                  <View style={styles.statsGrid}>
+                    <View style={styles.statsCard}>
+                      <Ionicons name="calendar-outline" size={32} color="#4A90E2" />
+                      <Text style={styles.statsNumber}>0</Text>
+                      <Text style={styles.statsLabel}>Sessões Realizadas</Text>
+                    </View>
+
+                    <View style={styles.statsCard}>
+                      <Ionicons name="calendar" size={32} color="#27AE60" />
+                      <Text style={styles.statsNumber}>--/--</Text>
+                      <Text style={styles.statsLabel}>Próxima Sessão</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.statsGrid}>
+                    <View style={styles.statsCard}>
+                      <Ionicons name="cash-outline" size={32} color="#27AE60" />
+                      <Text style={styles.statsNumber}>R$ 0,00</Text>
+                      <Text style={styles.statsLabel}>Pago</Text>
+                    </View>
+
+                    <View style={styles.statsCard}>
+                      <Ionicons name="alert-circle-outline" size={32} color="#E74C3C" />
+                      <Text style={styles.statsNumber}>R$ 0,00</Text>
+                      <Text style={styles.statsLabel}>Devendo</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Botões de Ação */}
+                <View style={styles.modalActionsSection}>
+                  <TouchableOpacity
+                    style={styles.reassignButtonModal}
+                    onPress={() => {
+                      setShowContactModal(false);
+                      handleAssignPsychologist(contactPatient);
+                    }}
+                  >
+                    <Ionicons
+                      name={hasPsychologist(contactPatient) ? 'swap-horizontal' : 'person-add'}
+                      size={20}
+                      color="#4A90E2"
+                    />
+                    <Text style={styles.reassignButtonModalText}>
+                      {hasPsychologist(contactPatient) ? 'Reatribuir Psicólogo' : 'Atribuir Psicólogo'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.unlinkButtonModalPatient}
+                    onPress={() => {
+                      setShowContactModal(false);
+                      handleUnlinkPatient(contactPatient);
+                    }}
+                  >
+                    <Ionicons name="unlink" size={20} color="#FF6B6B" />
+                    <Text style={styles.unlinkButtonModalTextPatient}>Desvincular da Clínica</Text>
+                  </TouchableOpacity>
+                </View>
 
                 <TouchableOpacity
                   style={styles.closeContactButton}
@@ -538,7 +593,7 @@ export default function PatientsScreen({ navigation }: any) {
                 >
                   <Text style={styles.closeContactButtonText}>Fechar</Text>
                 </TouchableOpacity>
-              </View>
+              </ScrollView>
             )}
           </View>
         </View>
@@ -1067,5 +1122,93 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#666',
+  },
+  viewDetailsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#4A90E2',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 12,
+    gap: 8,
+  },
+  viewDetailsButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  contactSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  statsSection: {
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 12,
+  },
+  statsCard: {
+    flex: 1,
+    backgroundColor: '#f9f9f9',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  statsNumber: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 8,
+  },
+  statsLabel: {
+    fontSize: 11,
+    color: '#666',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  modalActionsSection: {
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  reassignButtonModal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#E8F4FF',
+    paddingVertical: 14,
+    borderRadius: 8,
+    gap: 8,
+    marginBottom: 12,
+  },
+  reassignButtonModalText: {
+    color: '#4A90E2',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  unlinkButtonModalPatient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFE8E8',
+    paddingVertical: 14,
+    borderRadius: 8,
+    gap: 8,
+  },
+  unlinkButtonModalTextPatient: {
+    color: '#FF6B6B',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

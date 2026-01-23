@@ -545,3 +545,16 @@ export const getNewPatientsThisMonth = async (clinicId: string): Promise<number>
   // Se não conseguir de nenhuma forma, retorna 0
   return 0;
 };
+
+/**
+ * Obter pacientes de um psicólogo específico
+ */
+export const getPsychologistPatients = async (psychologistId: string): Promise<PatientBasic[]> => {
+  try {
+    const response = await api.get(`/psychologists/${psychologistId}/patients`);
+    return response.data.data || [];
+  } catch (err) {
+    console.error('Erro ao buscar pacientes do psicólogo:', err);
+    return [];
+  }
+};
