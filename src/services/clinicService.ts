@@ -552,9 +552,87 @@ export const getNewPatientsThisMonth = async (clinicId: string): Promise<number>
 export const getPsychologistPatients = async (psychologistId: string): Promise<PatientBasic[]> => {
   try {
     const response = await api.get(`/psychologists/${psychologistId}/patients`);
-    return response.data.data || [];
+    if (response.data?.data?.patients) {
+      return response.data.data.patients;
+    }
+    return [];
   } catch (err) {
     console.error('Erro ao buscar pacientes do psicólogo:', err);
     return [];
+  }
+};
+
+/**
+ * Obter estatísticas de um paciente (sessões, próxima consulta, valores)
+ */
+export const getPatientStats = async (patientId: string): Promise<{
+  sessionsCount: number;
+  nextAppointment: string | null;
+  totalPaid: number;
+  totalPending: number;
+}> => {
+  try {
+    // Buscar consultas do paciente
+    const appointmentsResponse = await api.get(`/patients/${patientId}/appointments`);
+    const appointments = appointmentsResponse.data?.data || [];
+
+    // Contar sessões realizadas
+    const sessionsCount = Array.isArray(appointments)
+      ? appointments.filter((apt: any) => apt.status === 'completed').length
+      : 0;
+
+    // Buscar próxima consulta
+    const now = new Date();
+    const futureAppointments = Array.isArray(appointments)
+      ? appointments.filter((apt: any) => {
+          const aptDate = new Date(apt.dateTime || apt.date);
+          return aptDate >= now && ['scheduled', 'confirmed'].includes(apt.status);
+        })
+      : [];
+
+    futureAppointments.sort((a: any, b: any) => {
+      const dateA = new Date(a.dateTime || a.date);
+      const dateB = new Date(b.dateTime || b.date);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+    const nextAppointment = futureAppointments.length > 0 ? futureAppointments[0].dateTime || futureAppointments[0].date : null;
+
+    // Buscar informações de pagamento (se disponível)
+    let totalPaid = 0;
+    let totalPending = 0;
+
+    try {
+      const paymentsResponse = await api.get(`/patients/${patientId}/payments`);
+      const payments = paymentsResponse.data?.data || [];
+
+      if (Array.isArray(payments)) {
+        totalPaid = payments
+          .filter((p: any) => p.status === 'paid')
+          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+
+        totalPending = payments
+          .filter((p: any) => p.status === 'pending')
+          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+      }
+    } catch (paymentErr) {
+      // Pagamentos podem não estar implementados ainda
+      console.log('Pagamentos não disponíveis ainda');
+    }
+
+    return {
+      sessionsCount,
+      nextAppointment,
+      totalPaid,
+      totalPending,
+    };
+  } catch (err) {
+    console.error('Erro ao buscar estatísticas do paciente:', err);
+    return {
+      sessionsCount: 0,
+      nextAppointment: null,
+      totalPaid: 0,
+      totalPending: 0,
+    };
   }
 };

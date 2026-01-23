@@ -66,13 +66,15 @@ export default function PsychologistsScreen({ navigation }: any) {
   const handleOpenContactModal = async (psychologist: ClinicPsychologist) => {
     setContactPsychologist(psychologist);
     setShowContactModal(true);
+    setPsychologistPatients([]); // Reset
 
     // Carregar pacientes do psicólogo
     setLoadingModalData(true);
     try {
       const psyId = psychologist._id || psychologist.id;
       const patients = await clinicService.getPsychologistPatients(psyId);
-      setPsychologistPatients(patients);
+      // Garantir que é um array
+      setPsychologistPatients(Array.isArray(patients) ? patients : []);
     } catch (error) {
       console.error('Erro ao carregar pacientes do psicólogo:', error);
       setPsychologistPatients([]);

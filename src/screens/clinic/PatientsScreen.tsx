@@ -49,6 +49,13 @@ export default function PatientsScreen({ navigation }: any) {
   // Modal de contato do paciente
   const [showContactModal, setShowContactModal] = useState(false);
   const [contactPatient, setContactPatient] = useState<Patient | null>(null);
+  const [patientStats, setPatientStats] = useState<{
+    sessionsCount: number;
+    nextAppointment: string | null;
+    totalPaid: number;
+    totalPending: number;
+  } | null>(null);
+  const [loadingStats, setLoadingStats] = useState(false);
 
   // Carregar psicólogos
   const loadPsychologists = useCallback(async () => {
@@ -221,9 +228,24 @@ export default function PatientsScreen({ navigation }: any) {
   };
 
   // Abrir modal de contato do paciente
-  const handleOpenContactModal = (patient: Patient) => {
+  const handleOpenContactModal = async (patient: Patient) => {
     setContactPatient(patient);
     setShowContactModal(true);
+    setPatientStats(null);
+
+    // Carregar estatísticas do paciente
+    setLoadingStats(true);
+    try {
+      const patientId = patient._id || patient.id;
+      if (patientId) {
+        const stats = await clinicService.getPatientStats(patientId);
+        setPatientStats(stats);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas do paciente:', error);
+    } finally {
+      setLoadingStats(false);
+    }
   };
 
   // Abrir WhatsApp
@@ -527,33 +549,50 @@ export default function PatientsScreen({ navigation }: any) {
                 <View style={styles.statsSection}>
                   <Text style={styles.sectionTitle}>Estatísticas</Text>
 
-                  <View style={styles.statsGrid}>
-                    <View style={styles.statsCard}>
-                      <Ionicons name="calendar-outline" size={32} color="#4A90E2" />
-                      <Text style={styles.statsNumber}>0</Text>
-                      <Text style={styles.statsLabel}>Sessões Realizadas</Text>
-                    </View>
+                  {loadingStats ? (
+                    <ActivityIndicator color="#4A90E2" style={{ marginVertical: 20 }} />
+                  ) : (
+                    <>
+                      <View style={styles.statsGrid}>
+                        <View style={styles.statsCard}>
+                          <Ionicons name="calendar-outline" size={32} color="#4A90E2" />
+                          <Text style={styles.statsNumber}>{patientStats?.sessionsCount || 0}</Text>
+                          <Text style={styles.statsLabel}>Sessões Realizadas</Text>
+                        </View>
 
-                    <View style={styles.statsCard}>
-                      <Ionicons name="calendar" size={32} color="#27AE60" />
-                      <Text style={styles.statsNumber}>--/--</Text>
-                      <Text style={styles.statsLabel}>Próxima Sessão</Text>
-                    </View>
-                  </View>
+                        <View style={styles.statsCard}>
+                          <Ionicons name="calendar" size={32} color="#27AE60" />
+                          <Text style={styles.statsNumber}>
+                            {patientStats?.nextAppointment
+                              ? new Date(patientStats.nextAppointment).toLocaleDateString('pt-BR', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                })
+                              : '--/--'}
+                          </Text>
+                          <Text style={styles.statsLabel}>Próxima Sessão</Text>
+                        </View>
+                      </View>
 
-                  <View style={styles.statsGrid}>
-                    <View style={styles.statsCard}>
-                      <Ionicons name="cash-outline" size={32} color="#27AE60" />
-                      <Text style={styles.statsNumber}>R$ 0,00</Text>
-                      <Text style={styles.statsLabel}>Pago</Text>
-                    </View>
+                      <View style={styles.statsGrid}>
+                        <View style={styles.statsCard}>
+                          <Ionicons name="cash-outline" size={32} color="#27AE60" />
+                          <Text style={styles.statsNumber}>
+                            R$ {(patientStats?.totalPaid || 0).toFixed(2)}
+                          </Text>
+                          <Text style={styles.statsLabel}>Pago</Text>
+                        </View>
 
-                    <View style={styles.statsCard}>
-                      <Ionicons name="alert-circle-outline" size={32} color="#E74C3C" />
-                      <Text style={styles.statsNumber}>R$ 0,00</Text>
-                      <Text style={styles.statsLabel}>Devendo</Text>
-                    </View>
-                  </View>
+                        <View style={styles.statsCard}>
+                          <Ionicons name="alert-circle-outline" size={32} color="#E74C3C" />
+                          <Text style={styles.statsNumber}>
+                            R$ {(patientStats?.totalPending || 0).toFixed(2)}
+                          </Text>
+                          <Text style={styles.statsLabel}>Devendo</Text>
+                        </View>
+                      </View>
+                    </>
+                  )}
                 </View>
 
                 {/* Botões de Ação */}

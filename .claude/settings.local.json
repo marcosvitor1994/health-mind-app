@@ -23,7 +23,8 @@
       "Bash(npx expo install:*)",
       "Bash(dir:*)",
       "Bash(ls:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

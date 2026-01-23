@@ -50,7 +50,7 @@ export default function EditProfileScreen({ navigation }: EditProfileScreenProps
     setLoading(true);
     try {
       const userId = user._id || user.id;
-      const data = await clinicService.getClinicById(userId);
+      const data = await clinicService.getClinic(userId);
       setClinicData(data);
 
       // Pre-fill form fields
